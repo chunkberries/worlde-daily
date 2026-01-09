@@ -78,11 +78,13 @@
     const defaultDateStr = `${yyyy}-${mm}-${dd}`;
     datePicker.value = defaultDateStr;
 
+    // Format date as a readable string
     function formatDisplayDate(dateStr) {
         const date = new Date(dateStr + 'T00:00:00Z');
         return date.toDateString();
     }
 
+    // Fetch solution based on print_date
     function fetchSolution(dateStr) {
         dateDisplay.textContent = `Date: ${formatDisplayDate(dateStr)}`;
         solutionDiv.textContent = 'Loading...';
@@ -104,13 +106,13 @@
             });
     }
 
-    // Fetch solution when date is changed
+    // When date is changed, fetch new solution
     datePicker.addEventListener('change', () => {
         const selectedDate = datePicker.value;
         fetchSolution(selectedDate);
     });
 
-    // Fetch today's solution on load
+    // Load today's solution by default
     window.addEventListener('load', () => {
         fetchSolution(defaultDateStr);
     });
