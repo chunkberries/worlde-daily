@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wordle Solution Viewer</title>
+<style>
+    body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background-color: #fdf6e3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+    .container {
+        background-color: #fff8dc;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+    }
+    h1 {
+        color: #333;
+        font-size: 2em;
+        margin-bottom: 15px;
+    }
+    #datePicker {
+        padding: 8px 12px;
+        font-size: 1em;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+    #solution {
+        font-size: 3em;
+        font-weight: bold;
+        letter-spacing: 8px;
+        color: #2e8b57;
+        background-color: #e0f7fa;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    p {
+        margin-top: 20px;
+        font-size: 1em;
+        color: #555;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Wordle Solution Viewer</h1>
+    <input type="date" id="datePicker" />
+    <div id="solution">Select a date to see the solution</div>
+    <p id="selectedDate"></p>
+</div>
+
+<script>
+    const datePicker = document.getElementById('datePicker');
+    const solutionDiv = document.getElementById('solution');
+    const dateDisplay = document.getElementById('selectedDate');
+
+    // Set default date to today
+    const today = new Date();
+    const yyyy = today.getUTCFullYear();
+    const mm = String(today.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(today.getUTCDate()).padStart(2, '0');
+    const defaultDateStr = `${yyyy}-${mm}-${dd}`;
+    datePicker.value = defaultDateStr;
+
+    function formatDisplayDate(dateStr) {
+        const date = new Date(dateStr + 'T00:00:00Z');
+        return date.toDateString();
+    }
+
+    function fetchSolution(dateStr) {
+        dateDisplay.textContent = `Date: ${formatDisplayDate(dateStr)}`;
+        solutionDiv.textContent = 'Loading...';
+
+        fetch(`https://www.nytimes.com/svc/wordle/v2/${dateStr}.json`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Data not available for this date');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const solution = data.solution || 'N/A';
+                solutionDiv.textContent = solution.toUpperCase();
+            })
+            .catch(error => {
+                solutionDiv.textContent = 'Solution not available';
+                console.error('Fetch error:', error);
+            });
+    }
+
+    // Fetch solution when date is changed
+    datePicker.addEventListener('change', () => {
+        const selectedDate = datePicker.value;
+        fetchSolution(selectedDate);
+    });
+
+    // Fetch today's solution on load
+    window.addEventListener('load', () => {
+        fetchSolution(defaultDateStr);
+    });
+</script>
+</body>
+</html>
